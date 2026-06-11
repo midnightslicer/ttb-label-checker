@@ -1,0 +1,55 @@
+<% content_for :title, "Review ##{@review.id} — TTB Label Verification" %>
+<% if @review.active? %>
+  <% content_for :head do %><meta http-equiv="refresh" content="2"><% end %>
+<% end %>
+
+<div class="wrap">
+  <% if @review.batch_upload_id %>
+    <p><%= link_to "← Back to batch ##{@review.batch_upload_id}", batch_path(@review.batch_upload_id) %></p>
+  <% end %>
+
+  <h1 class="page-title">Label Review #<%= @review.id %></h1>
+
+  <% if @review.active? %>
+    <div class="card center">
+      <div class="spinner"></div>
+      <h2>Analyzing label…</h2>
+      <p class="muted">This page refreshes automatically. Large images and model cold-start can take up to a minute.</p>
+    </div>
+
+  <% elsif @review.failed? %>
+    <div class="card">
+      <p><%= render "shared/verdict_badge", verdict: nil %></p>
+      <div class="flash flash-alert" style="margin:0">
+        <strong>Analysis failed.</strong><br>
+        <%= @review.error_message.presence || "An unknown error occurred." %>
+      </div>
+    </div>
+
+  <% else %>
+    <% results = @review.results_data %>
+    <div class="card">
+      <p style="margin-top:0">
+        <%= render "shared/verdict_badge", verdict: @review.verdict, large: true %>
+      </p>
+
+      <div style="display:flex; gap:24px; flex-wrap:wrap; align-items:flex-start; margin-top:16px">
+        <% if @review.label_image.attached? %>
+          <%= image_tag @review.label_image, class: "thumb", alt: "Submitted label" %>
+        <% end %>
+        <div style="flex:1; min-width:240px">
+          <h2 style="margin-top:0">Field Comparison</h2>
+          <% if results %>
+            <%= render "shared/field_results_table", results: results %>
+          <% else %>
+            <p class="muted">Results unavailable.</p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <%= link_to "Check another label", new_review_path, class: "btn-secondary btn" %>
+    </div>
+  <% end %>
+</div>

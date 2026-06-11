@@ -1,29 +1,61 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title><%= content_for(:title) || "Ttb Label Checker" %></title>
+    <title><%= content_for(:title) || "TTB Label Verification" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Ttb Label Checker">
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
     <%= yield :head %>
 
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
-    <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
-
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
-    <%= javascript_importmap_tags %>
   </head>
 
   <body>
-    <%= yield %>
+    <div class="gov-banner">
+      <div class="inner">
+        <span class="flag">🇺🇸</span>
+        <span>An unofficial demonstration tool &mdash; not an official U.S. Government website.</span>
+      </div>
+    </div>
+
+    <header class="masthead">
+      <div class="inner">
+        <%= link_to root_path, class: "brand" do %>
+          <span class="seal">TTB</span>
+          <span class="title">
+            <strong>Label Verification</strong>
+            <span>Alcohol and Tobacco Tax and Trade Bureau</span>
+          </span>
+        <% end %>
+
+        <nav class="nav">
+          <% if authenticated? %>
+            <%= link_to "Single Label", new_review_path, class: ("active" if controller_name == "reviews") %>
+            <%= link_to "Batch Upload", new_batch_path, class: ("active" if controller_name == "batches" && action_name != "index") %>
+            <%= link_to "Batches", batches_path, class: ("active" if controller_name == "batches" && action_name == "index") %>
+            <%= button_to "Sign out", logout_path, method: :delete %>
+          <% else %>
+            <%= link_to "Sign in", login_path %>
+          <% end %>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <% if notice %><div class="wrap" style="padding-bottom:0"><div class="flash flash-notice"><%= notice %></div></div><% end %>
+      <% if alert %><div class="wrap" style="padding-bottom:0"><div class="flash flash-alert"><%= alert %></div></div><% end %>
+      <%= yield %>
+    </main>
+
+    <footer class="site">
+      <div class="inner">
+        TTB Label Verification &middot; Demonstration application. Label data is
+        analyzed locally and compared against submitted application values.
+      </div>
+    </footer>
   </body>
 </html>

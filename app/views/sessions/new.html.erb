@@ -1,0 +1,35 @@
+<% content_for :title, "Sign in — TTB Label Verification" %>
+<% if TurnstileService.enabled? %>
+  <% content_for :head do %>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <% end %>
+<% end %>
+
+<div class="login-wrap">
+  <h1 class="page-title">Sign in</h1>
+  <p class="page-sub">Authorized personnel only. Sign in to submit labels for verification.</p>
+
+  <div class="card">
+    <%= form_with url: login_path, method: :post, local: true do |f| %>
+      <div class="field">
+        <%= f.label :username %>
+        <%= f.text_field :username, autocomplete: "username", autofocus: true, required: true %>
+      </div>
+
+      <div class="field">
+        <%= f.label :password %>
+        <%= f.password_field :password, autocomplete: "current-password", required: true %>
+      </div>
+
+      <% if TurnstileService.enabled? %>
+        <div class="field">
+          <div class="cf-turnstile" data-sitekey="<%= TurnstileService.site_key %>"></div>
+        </div>
+      <% end %>
+
+      <%= f.submit "Sign in", class: "btn btn-block" %>
+    <% end %>
+  </div>
+
+  <p class="muted center">Protected by Cloudflare Turnstile.</p>
+</div>

@@ -17,6 +17,13 @@ gem "stimulus-rails"
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem "jbuilder"
 
+# HTTP client for the local Ollama vision model and Cloudflare Turnstile verification
+gem "faraday"
+gem "faraday-retry"
+
+# CSV manifest parsing for batch uploads (no longer a default gem in Ruby 3.4+)
+gem "csv"
+
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 # gem "bcrypt", "~> 3.1.7"
 

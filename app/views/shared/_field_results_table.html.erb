@@ -1,0 +1,48 @@
+<%#
+  Renders the per-field comparison table. Locals: results (parsed hash with
+  symbol keys, as returned by FieldComparator).
+%>
+<% icon = ->(m) {
+     case m
+     when true    then ['match-true', '✓']
+     when 'fuzzy' then ['match-fuzzy', '~']
+     else ['match-false', '✗']
+     end
+   } %>
+
+<div class="table-scroll">
+  <table class="data">
+    <thead>
+      <tr>
+        <th>Field</th>
+        <th>Application Value</th>
+        <th>Label Value</th>
+        <th>Match</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% results[:fields].each do |f| %>
+        <% klass, glyph = icon.call(f[:match]) %>
+        <tr class="<%= 'row-fail' if f[:match] == false %><%= 'row-fuzzy' if f[:match] == 'fuzzy' %>">
+          <td class="field-name"><%= f[:field].to_s.humanize %></td>
+          <td><%= f[:app_value].presence || content_tag(:span, "—", class: "muted") %></td>
+          <td><%= f[:label_value].presence || content_tag(:span, "—", class: "muted") %></td>
+          <td class="center"><span class="match-icon <%= klass %>"><%= glyph %></span></td>
+          <td class="note"><%= f[:note] %></td>
+        </tr>
+      <% end %>
+
+      <% gw = results[:government_warning] %>
+      <% gw_klass, gw_glyph = icon.call(gw[:exact_match]) %>
+      <tr class="<%= 'row-fail' unless gw[:exact_match] %>">
+        <td class="field-name">Government Warning</td>
+        <td colspan="2">
+          <span class="muted">Must match the required TTB Surgeon General warning verbatim.</span>
+        </td>
+        <td class="center"><span class="match-icon <%= gw_klass %>"><%= gw_glyph %></span></td>
+        <td class="note"><%= gw[:note] || "Exact match" %></td>
+      </tr>
+    </tbody>
+  </table>
+</div>

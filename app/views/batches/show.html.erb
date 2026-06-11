@@ -1,0 +1,56 @@
+<% content_for :title, "Batch ##{@batch.id} — TTB Label Verification" %>
+<% if @batch.active? %>
+  <% content_for :head do %><meta http-equiv="refresh" content="5"><% end %>
+<% end %>
+
+<div class="wrap">
+  <p><%= link_to "← All batches", batches_path %></p>
+  <h1 class="page-title">Batch #<%= @batch.id %></h1>
+
+  <div class="card">
+    <ul class="meta-list">
+      <li><strong>Status:</strong> <span class="badge badge-<%= @batch.status %>"><%= @batch.status %></span></li>
+      <li><strong>Progress:</strong> <%= @batch.progress_label %></li>
+      <li><strong>Failed:</strong> <%= @batch.failed_count %></li>
+      <li><strong>Submitted:</strong> <%= @batch.created_at.strftime("%B %-d, %Y at %-l:%M %p") %></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Labels</h2>
+    <div class="table-scroll">
+      <table class="data">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>File</th>
+            <th>Brand</th>
+            <th>Status</th>
+            <th>Verdict</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @reviews.each_with_index do |review, i| %>
+            <tr>
+              <td><%= i + 1 %></td>
+              <td><%= review.label_image.attached? ? review.label_image.filename.to_s : "—" %></td>
+              <td><%= review.app_brand_name.presence || content_tag(:span, "—", class: "muted") %></td>
+              <td><span class="badge badge-<%= review.status %>"><%= review.status %></span></td>
+              <td>
+                <% if review.complete? %>
+                  <%= render "shared/verdict_badge", verdict: review.verdict %>
+                <% elsif review.failed? %>
+                  <span class="muted">—</span>
+                <% else %>
+                  <span class="muted">pending</span>
+                <% end %>
+              </td>
+              <td><%= link_to "View", review_path(review) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

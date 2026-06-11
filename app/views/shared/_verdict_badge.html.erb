@@ -1,0 +1,9 @@
+<%#
+  Renders a verdict pill. Locals: verdict (string), large (boolean, optional)
+%>
+<% labels = { "approve" => "Approve", "reject" => "Reject", "needs_review" => "Needs Review" } %>
+<% if verdict.present? %>
+  <span class="verdict verdict-<%= verdict %> <%= "verdict-lg" if local_assigns[:large] %>">
+    <%= labels.fetch(verdict, verdict.to_s.titleize) %>
+  </span>
+<% end %>
