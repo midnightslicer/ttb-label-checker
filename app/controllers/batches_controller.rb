@@ -68,7 +68,7 @@ class BatchesController < ApplicationController
       batch = BatchUpload.create!(total_count: rows.size, status: "pending")
 
       rows.each do |row|
-        review = batch.label_reviews.create!(
+        review = batch.label_reviews.build(
           status:                "pending",
           app_brand_name:        row["brand_name"],
           app_class_type:        row["class_type"],
@@ -78,6 +78,7 @@ class BatchesController < ApplicationController
           app_country_of_origin: row["country_of_origin"]
         )
         review.label_image.attach(images_by_name[row["filename"]])
+        review.save!
       end
     end
 

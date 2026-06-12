@@ -21,6 +21,10 @@ class FieldComparator
   # Country of origin is optional on the application; don't penalize a blank.
   OPTIONAL_FIELDS = %i[country_of_origin].freeze
 
+  # Fields compared by their leading numeric value rather than as text, so
+  # "11" matches "11% BY VOL.".
+  NUMERIC_FIELDS = %i[abv].freeze
+
   def self.call(app_data, extracted)
     new(app_data, extracted).call
   end
@@ -60,6 +64,18 @@ class FieldComparator
     str.downcase.gsub(/[^\w\s\-\/]/, "").gsub(/\s+/, " ").strip
   end
 
+  # Whitespace-insensitive form for containment checks, so the applicant's
+  # "750 mL" is recognized inside the label's "NET CONT. 750ML".
+  def compact(str)
+    normalize(str).gsub(/\s+/, "")
+  end
+
+  # Leading numeric value of a string (e.g. "11% BY VOL." => 11.0), or nil.
+  def numeric_value(str)
+    match = str.match(/-?\d+(?:\.\d+)?/)
+    match && match[0].to_f
+  end
+
   def compare_field(app_key, app_value, label_value)
     if app_value.blank? && OPTIONAL_FIELDS.include?(app_key)
       return { match: true, note: "Not provided (optional)" }
@@ -67,13 +83,21 @@ class FieldComparator
     return { match: false, note: "Not found on label" } if label_value.blank?
     return { match: false, note: "Not provided in application" } if app_value.blank?
 
-    n_app   = normalize(app_value)
-    n_label = normalize(label_value)
+    if NUMERIC_FIELDS.include?(app_key)
+      app_num   = numeric_value(app_value)
+      label_num = numeric_value(label_value)
+      return { match: true, note: nil } if app_num && label_num && app_num == label_num
+    end
 
-    if n_app == n_label
+    c_app   = compact(app_value)
+    c_label = compact(label_value)
+
+    if c_label.include?(c_app)
+      # Exact match, or the label carries the full application value plus
+      # standard TTB boilerplate ("NET CONT.", "PRODUCT OF", "% BY VOL.").
       { match: true, note: nil }
-    elsif n_app.include?(n_label) || n_label.include?(n_app)
-      { match: "fuzzy", note: "Values are similar but not identical — review required" }
+    elsif c_app.include?(c_label)
+      { match: "fuzzy", note: "Label shows only part of the application value — review required" }
     else
       { match: false, note: %(Application says "#{app_value}" but label shows "#{label_value}") }
     end
