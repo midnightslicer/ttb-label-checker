@@ -1,5 +1,11 @@
-# Pure-Ruby comparison of applicant-supplied data against the fields the vision
-# model extracted from the label. Returns the results JSON structure.
+# Compares applicant-supplied data against the fields the vision model extracted
+# from the label and returns the results JSON structure.
+#
+# Deterministic string/number rules run first (the fast path). Semantic text
+# fields that those rules can't cleanly resolve are escalated to SemanticMatcher,
+# a small LLM that judges them against the full label transcription — this is how
+# synonyms, boilerplate, and multi-party labels (importer vs bottler) get matched.
+# The government warning stays fully deterministic.
 class FieldComparator
   GOVERNMENT_WARNING = (
     "GOVERNMENT WARNING: (1) According to the Surgeon General, women should not " \
@@ -25,6 +31,11 @@ class FieldComparator
   # "11" matches "11% BY VOL.".
   NUMERIC_FIELDS = %i[abv].freeze
 
+  # Semantic text fields that may be escalated to the LLM matcher when the
+  # deterministic checks don't produce a clean match. Quantitative fields (abv,
+  # net_contents) stay code-only — exact rules beat an LLM there.
+  LLM_FIELDS = %i[brand_name class_type producer country_of_origin].freeze
+
   def self.call(app_data, extracted)
     new(app_data, extracted).call
   end
@@ -49,7 +60,9 @@ class FieldComparator
       }
     end
 
-    warning_result = compare_warning(@extracted["government_warning"].to_s)
+    apply_semantic_matches(field_results)
+
+    warning_result = compare_warning(@extracted["government_warning"].to_s, @extracted["full_text"].to_s)
 
     {
       fields:             field_results,
@@ -59,6 +72,63 @@ class FieldComparator
   end
 
   private
+
+  # Resolve the semantic fields the structured comparison couldn't clear, using
+  # the full label transcription. First deterministically: the application value
+  # often appears verbatim somewhere in full_text even when the structured field
+  # captured a different candidate (e.g. the importer line vs the bottler line).
+  # Only the genuinely fuzzy remainder (abbreviations, reordering, synonyms) is
+  # escalated to the LLM matcher. Results are overwritten in place.
+  def apply_semantic_matches(field_results)
+    label_text = @extracted["full_text"].to_s
+    return if label_text.blank?
+
+    candidates = field_results.select do |f|
+      LLM_FIELDS.include?(f[:field].to_sym) && f[:match] != true && f[:app_value].present?
+    end
+    return if candidates.empty?
+
+    compact_label = compact(label_text)
+    candidates.reject! do |f|
+      next false unless compact_label.include?(compact(f[:app_value]))
+
+      f[:match]       = true
+      f[:label_value] = snippet_for(label_text, f[:app_value]) || f[:label_value]
+      f[:note]        = nil
+      true
+    end
+    return if candidates.empty?
+
+    apply_llm_matches(label_text, candidates)
+  end
+
+  def apply_llm_matches(label_text, candidates)
+    items = candidates.map do |f|
+      { field: f[:field], app_value: f[:app_value], label_value: f[:label_value] }
+    end
+    verdicts = SemanticMatcher.call(label_text, items)
+
+    candidates.each do |f|
+      verdict = verdicts[f[:field]]
+      next unless verdict
+
+      f[:match]       = verdict[:match]
+      f[:label_value] = verdict[:label_value].presence || f[:label_value]
+      f[:note]        = verdict[:note]
+    end
+  rescue SemanticMatcher::MatchError
+    nil # keep the deterministic results when the matcher can't run
+  end
+
+  # The original-formatting snippet of full_text that spans the application value
+  # (first word ... last word), for display in the results table.
+  def snippet_for(label_text, app_value)
+    words = app_value.split(/\s+/).map { |w| w.gsub(/[^\w]/, "") }.reject { |w| w.length < 2 }
+    return nil if words.empty?
+
+    re = /#{Regexp.escape(words.first)}.{0,90}?#{Regexp.escape(words.last)}/i
+    label_text.match(re)&.to_s
+  end
 
   def normalize(str)
     str.downcase.gsub(/[^\w\s\-\/]/, "").gsub(/\s+/, " ").strip
@@ -103,13 +173,20 @@ class FieldComparator
     end
   end
 
-  def compare_warning(extracted_warning)
-    normalized_extracted = extracted_warning.gsub(/\s+/, " ").strip
-    normalized_required  = GOVERNMENT_WARNING.gsub(/\s+/, " ").strip
+  # Checked against both the dedicated government_warning field and the full label
+  # transcription: the vision model sometimes drops the heading from the structured
+  # field while keeping it verbatim in full_text (or vice versa), so either source
+  # satisfying the requirement counts.
+  def compare_warning(extracted_warning, full_text)
+    normalized_required = GOVERNMENT_WARNING.gsub(/\s+/, " ").strip.downcase
+    sources = [extracted_warning, full_text].map { |s| s.to_s.gsub(/\s+/, " ").strip }
 
-    present     = extracted_warning.present?
-    exact_match = normalized_extracted == normalized_required
-    has_prefix  = extracted_warning.start_with?("GOVERNMENT WARNING:")
+    # Compare case-insensitively: TTB mandates the wording, not the casing, and
+    # real labels routinely print the whole warning in all-caps. The required text
+    # may be a substring of full_text, so accept containment as well as equality.
+    present     = sources.any? { |s| s.match?(/government warning/i) }
+    exact_match = sources.any? { |s| s.downcase.include?(normalized_required) }
+    has_prefix  = sources.any? { |s| s.match?(/GOVERNMENT WARNING:/i) }
 
     {
       present:     present,

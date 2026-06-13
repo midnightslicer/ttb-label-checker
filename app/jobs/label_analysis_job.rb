@@ -27,9 +27,15 @@ class LabelAnalysisJob < ApplicationJob
 
   # Runs the attached image through the vision model. Active Storage may store
   # the blob remotely, so download to a tempfile rather than assuming a path.
+  # The image is preprocessed first to give the model cleaner edges to read.
   def analyze(review)
     review.label_image.blob.open do |file|
-      OllamaService.call(file.path)
+      processed = ImagePreprocessor.call(file.path)
+      begin
+        OllamaService.call(processed.path)
+      ensure
+        processed.close!
+      end
     end
   end
 
