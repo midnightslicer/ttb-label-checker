@@ -1,0 +1,58 @@
+<% content_for :title, "Reviews — LabelCheck" %>
+<% if @reviews.any?(&:active?) %>
+  <% content_for :head do %><meta http-equiv="refresh" content="5"><% end %>
+<% end %>
+
+<div class="wrap">
+  <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap">
+    <div>
+      <h1 class="page-title">Reviews</h1>
+      <p class="page-sub" style="margin-bottom:0">Every label that's been checked. This list refreshes while any review is running.</p>
+    </div>
+    <div class="actions">
+      <%= link_to "New Batch", new_batch_path, class: "btn btn-secondary" %>
+      <%= link_to "Check a Label", new_review_path, class: "btn" %>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px">
+    <% if @reviews.empty? %>
+      <p class="center muted" style="margin:24px 0">No reviews yet. <%= link_to "Check your first label", new_review_path %>.</p>
+    <% else %>
+      <div class="table-scroll">
+        <table class="data">
+          <thead>
+            <tr>
+              <th>Review</th>
+              <th>Brand</th>
+              <th>Created</th>
+              <th>Source</th>
+              <th>Status</th>
+              <th>Verdict</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @reviews.each do |review| %>
+              <tr>
+                <td>#<%= review.id %></td>
+                <td><%= review.app_brand_name.presence || "—" %></td>
+                <td><%= review.created_at.strftime("%b %-d, %Y %-l:%M %p") %></td>
+                <td>
+                  <% if review.batch_upload_id %>
+                    <%= link_to "Batch ##{review.batch_upload_id}", batch_path(review.batch_upload_id) %>
+                  <% else %>
+                    Single
+                  <% end %>
+                </td>
+                <td><span class="badge badge-<%= review.status %>"><%= review.status %></span></td>
+                <td><%= render "shared/verdict_badge", verdict: review.verdict %></td>
+                <td><%= link_to "View", review_path(review) %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+  </div>
+</div>

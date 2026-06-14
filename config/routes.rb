@@ -6,7 +6,7 @@ Rails.application.routes.draw do
   post   "login"  => "sessions#create"
   delete "logout" => "sessions#destroy", as: :logout
 
-  resources :reviews, only: %i[new create show]
+  resources :reviews, only: %i[index new create show]
   resources :batches, only: %i[index new create show]
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions.

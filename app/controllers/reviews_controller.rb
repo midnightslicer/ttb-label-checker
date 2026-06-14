@@ -1,4 +1,8 @@
 class ReviewsController < ApplicationController
+  def index
+    @reviews = LabelReview.recent
+  end
+
   def new
     @review = LabelReview.new
   end

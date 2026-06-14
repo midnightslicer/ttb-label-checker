@@ -32,7 +32,8 @@
 
         <nav class="nav">
           <% if authenticated? %>
-            <%= link_to "Single Label", new_review_path, class: ("active" if controller_name == "reviews") %>
+            <%= link_to "Single Label", new_review_path, class: ("active" if controller_name == "reviews" && action_name != "index") %>
+            <%= link_to "Reviews", reviews_path, class: ("active" if controller_name == "reviews" && action_name == "index") %>
             <%= link_to "Batch Upload", new_batch_path, class: ("active" if controller_name == "batches" && action_name != "index") %>
             <%= link_to "Batches", batches_path, class: ("active" if controller_name == "batches" && action_name == "index") %>
             <%= button_to "Sign out", logout_path, method: :delete, class: "nav-signout" %>
