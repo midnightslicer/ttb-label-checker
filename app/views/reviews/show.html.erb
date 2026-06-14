@@ -1,15 +1,14 @@
 <% content_for :title, "Review ##{@review.id} — LabelCheck" %>
-<% if @review.active? %>
-  <% content_for :head do %><meta http-equiv="refresh" content="2"><% end %>
-<% end %>
 
-<div class="wrap">
+<div class="wrap" data-controller="refresh"
+     data-refresh-active-value="<%= @review.active? %>" data-refresh-interval-value="2000">
   <% if @review.batch_upload_id %>
     <p><%= link_to "← Back to batch ##{@review.batch_upload_id}", batch_path(@review.batch_upload_id) %></p>
   <% end %>
 
   <h1 class="page-title">Label Review #<%= @review.id %></h1>
 
+  <div data-refresh-region>
   <% if @review.active? %>
     <div class="card center">
       <div class="spinner"></div>
@@ -52,4 +51,5 @@
       <%= link_to "Check another label", new_review_path, class: "btn-secondary btn" %>
     </div>
   <% end %>
+  </div>
 </div>

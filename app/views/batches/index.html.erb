@@ -1,9 +1,6 @@
 <% content_for :title, "Batches — LabelCheck" %>
-<% if @batches.any?(&:active?) %>
-  <% content_for :head do %><meta http-equiv="refresh" content="5"><% end %>
-<% end %>
 
-<div class="wrap">
+<div class="wrap" data-controller="refresh" data-refresh-active-value="<%= @batches.any?(&:active?) %>">
   <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap">
     <div>
       <h1 class="page-title">Batches</h1>
@@ -15,7 +12,7 @@
     </div>
   </div>
 
-  <div class="card" style="margin-top:20px">
+  <div class="card" style="margin-top:20px" data-refresh-region>
     <% if @batches.empty? %>
       <p class="center muted" style="margin:24px 0">No batches yet. <%= link_to "Upload your first batch", new_batch_path %>.</p>
     <% else %>

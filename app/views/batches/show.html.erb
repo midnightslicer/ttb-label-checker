@@ -1,12 +1,10 @@
 <% content_for :title, "Batch ##{@batch.id} — LabelCheck" %>
-<% if @batch.active? %>
-  <% content_for :head do %><meta http-equiv="refresh" content="5"><% end %>
-<% end %>
 
-<div class="wrap">
+<div class="wrap" data-controller="refresh" data-refresh-active-value="<%= @batch.active? %>">
   <p><%= link_to "← All batches", batches_path %></p>
   <h1 class="page-title">Batch #<%= @batch.id %></h1>
 
+  <div data-refresh-region>
   <div class="card">
     <ul class="meta-list">
       <li><strong>Status:</strong> <span class="badge badge-<%= @batch.status %>"><%= @batch.status %></span></li>
@@ -52,5 +50,6 @@
         </tbody>
       </table>
     </div>
+  </div>
   </div>
 </div>
