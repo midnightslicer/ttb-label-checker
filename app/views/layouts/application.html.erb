@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title><%= content_for(:title) || "TTB Label Verification" %></title>
+    <title><%= content_for(:title) || "LabelCheck — TTB Compliance Checker" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -15,20 +15,17 @@
   </head>
 
   <body>
-    <div class="gov-banner">
-      <div class="inner">
-        <span class="flag">🇺🇸</span>
-        <span>An unofficial demonstration tool &mdash; not an official U.S. Government website.</span>
-      </div>
-    </div>
-
-    <header class="masthead">
+    <header class="topbar">
       <div class="inner">
         <%= link_to root_path, class: "brand" do %>
-          <span class="seal">TTB</span>
-          <span class="title">
-            <strong>Label Verification</strong>
-            <span>Alcohol and Tobacco Tax and Trade Bureau</span>
+          <span class="logo" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="brand-text">
+            <strong>LabelCheck</strong>
+            <span>TTB Compliance Checker</span>
           </span>
         <% end %>
 
@@ -37,9 +34,9 @@
             <%= link_to "Single Label", new_review_path, class: ("active" if controller_name == "reviews") %>
             <%= link_to "Batch Upload", new_batch_path, class: ("active" if controller_name == "batches" && action_name != "index") %>
             <%= link_to "Batches", batches_path, class: ("active" if controller_name == "batches" && action_name == "index") %>
-            <%= button_to "Sign out", logout_path, method: :delete %>
+            <%= button_to "Sign out", logout_path, method: :delete, class: "nav-signout" %>
           <% else %>
-            <%= link_to "Sign in", login_path %>
+            <%= link_to "Sign in", login_path, class: "nav-cta" %>
           <% end %>
         </nav>
       </div>
@@ -53,8 +50,10 @@
 
     <footer class="site">
       <div class="inner">
-        TTB Label Verification &middot; Demonstration application. Label data is
-        analyzed locally and compared against submitted application values.
+        <span class="footer-brand">LabelCheck</span>
+        <span>A TTB compliance checker tool. Label images are analyzed and compared
+        against your submitted application values. Not affiliated with or endorsed by
+        any government agency.</span>
       </div>
     </footer>
   </body>

@@ -1,4 +1,4 @@
-<% content_for :title, "Batch Upload — TTB Label Verification" %>
+<% content_for :title, "Batch Upload — LabelCheck" %>
 <% template = "filename,brand_name,class_type,abv,net_contents,producer,country_of_origin\n" %>
 
 <div class="wrap">
@@ -14,16 +14,22 @@
           <%= link_to "Download template", "data:text/csv;charset=utf-8,#{ERB::Util.url_encode(template)}",
                 download: "ttb_batch_template.csv" %>
         </span>
-        <%= file_field_tag :csv, accept: ".csv", required: true %>
+        <%= render layout: "shared/dropzone", locals: { hint: "A single .csv manifest file" } do %>
+          <%= file_field_tag :csv, accept: ".csv", required: true,
+                class: "dropzone-input", data: { dropzone_target: "input" } %>
+        <% end %>
       </div>
 
       <div class="field">
         <%= label_tag :images, "Label Images" %>
         <span class="hint">Select every image referenced in the CSV. Filenames must match exactly.</span>
-        <%= file_field_tag "images[]", multiple: true, accept: "image/*", required: true %>
+        <%= render layout: "shared/dropzone", locals: { hint: "Select or drop all referenced images" } do %>
+          <%= file_field_tag "images[]", multiple: true, accept: "image/*", required: true,
+                class: "dropzone-input", data: { dropzone_target: "input" } %>
+        <% end %>
       </div>
 
-      <div class="flash flash-notice" style="border-color: var(--blue); background:#e7f1f8; color:#0b3b5e">
+      <div class="flash flash-notice" style="border-color: var(--brand); background: var(--brand-50); color: var(--brand-dark)">
         Upload the CSV and all image files together. Each <code>filename</code> in the CSV must
         match an uploaded image filename exactly (including extension).
       </div>
