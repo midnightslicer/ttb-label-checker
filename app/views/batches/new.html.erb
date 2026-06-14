@@ -14,19 +14,13 @@
           <%= link_to "Download template", "data:text/csv;charset=utf-8,#{ERB::Util.url_encode(template)}",
                 download: "ttb_batch_template.csv" %>
         </span>
-        <%= render layout: "shared/dropzone", locals: { hint: "A single .csv manifest file" } do %>
-          <%= file_field_tag :csv, accept: ".csv", required: true,
-                class: "dropzone-input", data: { dropzone_target: "input" } %>
-        <% end %>
+        <%= file_field_tag :csv, accept: ".csv", required: true %>
       </div>
 
       <div class="field">
         <%= label_tag :images, "Label Images" %>
         <span class="hint">Select every image referenced in the CSV. Filenames must match exactly.</span>
-        <%= render layout: "shared/dropzone", locals: { hint: "Select or drop all referenced images" } do %>
-          <%= file_field_tag "images[]", multiple: true, accept: "image/*", required: true,
-                class: "dropzone-input", data: { dropzone_target: "input" } %>
-        <% end %>
+        <%= file_field_tag "images[]", multiple: true, accept: "image/*", required: true %>
       </div>
 
       <div class="flash flash-notice" style="border-color: var(--brand); background: var(--brand-50); color: var(--brand-dark)">
