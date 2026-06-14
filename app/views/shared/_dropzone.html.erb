@@ -1,0 +1,16 @@
+<%# Drag-and-drop upload zone with image previews. Render with `layout:` wrapping %>
+<%# a file_field that carries class "dropzone-input" and %>
+<%# data-dropzone-target="input". Pass a `hint` local for the prompt text. %>
+<div class="dropzone" data-controller="dropzone"
+     data-action="dragenter->dropzone#dragEnter dragover->dropzone#dragOver dragleave->dropzone#dragLeave drop->dropzone#drop change->dropzone#selected">
+  <%= yield %>
+  <button type="button" class="dropzone-ui" data-action="dropzone#browse">
+    <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M12 16V4m0 0L8 8m4-4 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <p class="dropzone-text"><strong>Drag &amp; drop</strong> or <span class="dropzone-link">browse</span></p>
+    <p class="dropzone-hint"><%= hint %></p>
+  </button>
+  <div class="dropzone-previews" data-dropzone-target="previews"></div>
+</div>

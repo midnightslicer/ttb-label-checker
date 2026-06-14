@@ -15,7 +15,10 @@
       <div class="field">
         <%= f.label :label_image, "Label Image" %>
         <span class="hint">JPG, PNG, or WEBP of the label.</span>
-        <%= f.file_field :label_image, accept: "image/*", required: true %>
+        <%= render layout: "shared/dropzone", locals: { hint: "JPG, PNG, or WEBP of the label" } do %>
+          <%= f.file_field :label_image, accept: "image/*", required: true,
+                class: "dropzone-input", data: { dropzone_target: "input" } %>
+        <% end %>
       </div>
 
       <div class="field">
