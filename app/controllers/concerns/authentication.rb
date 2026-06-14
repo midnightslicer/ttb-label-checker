@@ -25,7 +25,7 @@ module Authentication
   def require_authentication
     return if authenticated?
 
-    session[:return_to] = request.fullpath if request.get_or_head?
+    session[:return_to] = request.fullpath if request.get? || request.head?
     redirect_to login_path
   end
 
