@@ -179,7 +179,7 @@ class FieldComparator
   # satisfying the requirement counts.
   def compare_warning(extracted_warning, full_text)
     normalized_required = GOVERNMENT_WARNING.gsub(/\s+/, " ").strip.downcase
-    sources = [extracted_warning, full_text].map { |s| s.to_s.gsub(/\s+/, " ").strip }
+    sources = [ extracted_warning, full_text ].map { |s| s.to_s.gsub(/\s+/, " ").strip }
 
     # Compare case-insensitively: TTB mandates the wording, not the casing, and
     # real labels routinely print the whole warning in all-caps. The required text

@@ -53,7 +53,7 @@ class ImagePreprocessor
   # Returns a Tempfile holding the processed JPEG. The caller owns its lifetime
   # and should close! it once the image has been read.
   def call
-    out = Tempfile.new(["label_pp", ".jpg"])
+    out = Tempfile.new([ "label_pp", ".jpg" ])
     out.binmode
     crop = label_crop_geometry
 

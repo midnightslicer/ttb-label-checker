@@ -51,7 +51,7 @@ class OllamaService
       raise EmptyResponseError, "empty response body" if raw.blank?
 
       parsed = JSON.parse(raw)
-      [normalize_whitespace(parsed), raw]
+      [ normalize_whitespace(parsed), raw ]
     rescue EmptyResponseError, JSON::ParserError => e
       retry if attempts < MAX_ATTEMPTS
 
@@ -73,7 +73,7 @@ class OllamaService
         prompt:  USER_PROMPT,
         stream:  false,
         options: { num_predict: 700, temperature: 0 },
-        images:  [image_data]
+        images:  [ image_data ]
       }
     end
 
