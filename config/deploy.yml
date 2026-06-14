@@ -51,7 +51,7 @@ env:
 
     # ---- App ----
     AUTH_USERNAME: dylan
-    TURNSTILE_SITE_KEY: 0x4AAAAAADiQs5uRE9jzPdls
+    TURNSTILE_SITE_KEY: 0x4AAAAAADiQs5uRE9jzPdls # public site key, safe in clear
     MAX_BATCH_SIZE: 300
 
     # Set number of processes dedicated to Solid Queue (default: 1)
