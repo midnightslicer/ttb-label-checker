@@ -13,7 +13,10 @@
     <%= form_with url: login_path, method: :post, local: true do |f| %>
       <div class="field">
         <%= f.label :username %>
-        <%= f.text_field :username, autocomplete: "username", autofocus: true, required: true %>
+        <%= f.text_field :username,
+                     autocomplete: "username",
+                     autofocus: true,
+                     required: true %>
       </div>
 
       <div class="field">
@@ -31,5 +34,5 @@
     <% end %>
   </div>
 
-  <p class="muted center">Protected by Cloudflare Turnstile.</p>
+  <p class="muted center">Protected by Cloudflare.</p>
 </div>
