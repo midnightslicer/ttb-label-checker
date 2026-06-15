@@ -31,6 +31,11 @@ be allowed per the client's instructions, but I needed that to protect my own ha
 electricity bill. On a real deployment one could hypothetically drop the login and Turnstile 
 and have it all behind a firewall.
 
+One main thing to remember is that I had to be slightly looser with the verification logic than 
+I would have liked because the small models I am using are not super reliable. In a real deploy 
+where I could have access to larger models (like Qwen 2.5 vl 32b or 72b) that logic could be 
+more strict and the program would be even more accurate.
+
 Now, for the rest of the readme with the setup instructions :)
 
 # TTB Label Verification
