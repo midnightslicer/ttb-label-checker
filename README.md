@@ -113,6 +113,24 @@ filename,brand_name,class_type,abv,net_contents,producer,country_of_origin
 Each `filename` must exactly match an uploaded image filename (including
 extension). A template is downloadable from the Batch Upload page.
 
+## Image preprocessing
+
+Before a label photo reaches the vision model it runs through ImageMagick
+(`app/services/image_preprocessor.rb`):
+
+1. **Label crop (best-effort).** Label photos are often a small, soft region of
+   a larger bottle shot, and the model only sees a downscaled copy — so fine
+   print (the government warning, the importer line) falls below readable
+   resolution and the model latches onto large decorative text. We locate the
+   bright label on the darker bottle via connected-components analysis on a
+   downscaled copy, then crop the original to it so its text fills the frame. If
+   no label is confidently detected, we keep the whole frame.
+2. **Normalize for the model.** Auto-orient (EXIF), downscale so the long edge is
+   at most 2048px (a high-quality resize we control rather than the model
+   server's default — 2048 is needed for the government warning to transcribe
+   verbatim), convert to grayscale, stretch contrast, sharpen, and encode as
+   JPEG (q95).
+
 ## How verdicts are decided
 
 - Each field is first normalized (case, whitespace, punctuation) and compared
