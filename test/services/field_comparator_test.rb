@@ -79,9 +79,13 @@ class FieldComparatorTest < ActiveSupport::TestCase
 
   test "full_text containment rescues a structured-field miss" do
     # The structured producer field captured the wrong party, but the applicant's
-    # value appears verbatim in the full transcription.
-    extracted = base_extracted.merge("producer" => "SOME IMPORTER LLC")
-    result    = FieldComparator.call(base_app, extracted)
+    # value appears (contiguously) in the full transcription, so the deterministic
+    # containment check rescues it without ever reaching the LLM matcher.
+    extracted = base_extracted.merge(
+      "producer"  => "SOME IMPORTER LLC",
+      "full_text" => "STONE'S THROW BREWING, BOULDER, CO #{FieldComparator::GOVERNMENT_WARNING}"
+    )
+    result = FieldComparator.call(base_app, extracted)
     assert_equal true, field(result, "producer")[:match]
   end
 
