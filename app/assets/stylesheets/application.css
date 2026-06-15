@@ -114,11 +114,6 @@ a:hover { color: var(--brand-dark); }
 .nav a:hover, .nav button:hover { background: var(--slate-100); color: var(--ink); }
 .nav a.active { background: var(--brand-50); color: var(--brand-dark); font-weight: 600; }
 .nav form { margin: 0; display: inline; }
-.nav .nav-cta, .nav .nav-signout {
-  border: 1px solid var(--slate-300);
-  color: var(--slate-700);
-}
-.nav .nav-cta:hover, .nav .nav-signout:hover { background: var(--slate-100); }
 
 /* ---------- Layout ---------- */
 .wrap {
@@ -410,8 +405,6 @@ table.data tr.row-fuzzy td { background: var(--amber-50); }
   overflow-x: auto;
   white-space: pre;
 }
-
-.login-wrap { max-width: 420px; margin: 64px auto; padding: 0 20px; }
 
 footer.site {
   background: var(--white);

@@ -1,11 +1,6 @@
 Rails.application.routes.draw do
   root "batches#index"
 
-  # Authentication
-  get    "login"  => "sessions#new",     as: :login
-  post   "login"  => "sessions#create"
-  delete "logout" => "sessions#destroy", as: :logout
-
   resources :reviews, only: %i[index new create show]
   resources :batches, only: %i[index new create show]
 

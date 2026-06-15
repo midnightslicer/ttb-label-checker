@@ -105,8 +105,7 @@ to guarantee verbatim casing.
 Config is entirely via `.env` (see `env.example`). Notable: `VISION_MODEL` (code
 default `gemma3:12b`, but `qwen2.5vl:7b` is recommended/used in the demo), `MATCH_MODEL`
 (`gemma3:4b`), `OLLAMA_URL` (use `http://host.docker.internal:11434` in Docker).
-Swapping a model requires `ollama pull`-ing it first. With Turnstile keys blank the
-login challenge is skipped (local dev).
+Swapping a model requires `ollama pull`-ing it first.
 
 ## Deployment
 

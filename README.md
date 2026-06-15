@@ -23,13 +23,9 @@ more often than not. It isn't perfect, but it demonstrates the idea is possible.
 little more compute (for larger image models) and about a week of dev time, this would be a 
 great little app to solve the proposed issue.
 
-The project is currently running on a cloud VPS with Cloudflare proxy in front of it for cache 
-and traffic control. The cloud VPS is connected to my personal computer over Tailscale, where 
-my RX 7900 XTX is running Ollama. I did have to put a login page so randoms on the internet 
-wouldn't be running the AI on my home machine. I know the Cloudflare Turnstile may not actually 
-be allowed per the client's instructions, but I needed that to protect my own hardware and 
-electricity bill. On a real deployment one could hypothetically drop the login and Turnstile 
-and have it all behind a firewall.
+The project is currently running on a cloud VPS connected to my personal computer over
+Tailscale, where my RX 7900 XTX is running Ollama. On a real deployment the app would
+sit behind a firewall.
 
 One main thing to remember is that I had to be slightly looser with the verification logic than 
 I would have liked because the small models I am using are not super reliable. In a real deploy 
@@ -47,9 +43,6 @@ compared against the applicant-supplied values; fields that deterministic string
 matching can't cleanly resolve are passed to a **second, smaller local text
 model** that judges them against the full transcription. The result is a
 per-field verdict (**Approve / Needs Review / Reject**).
-
-All upload pages are protected by username/password login plus a Cloudflare
-Turnstile challenge.
 
 - **No outbound internet required at runtime** — Ollama runs locally on the host.
 - **Single Docker container**, configured entirely through `.env`.
@@ -75,13 +68,11 @@ Turnstile challenge.
 cp env.example .env
 # Fill in SECRET_KEY_BASE (generate one):
 bin/rails secret
-# Set AUTH_USERNAME / AUTH_PASSWORD, and optionally the Turnstile keys.
 
 docker compose up --build
 ```
 
-The app is served at <http://localhost:3000>. Sign in with the credentials you
-set in `.env`, then use **Single Label** or **Batch Upload**.
+The app is served at <http://localhost:3000>. Use **Single Label** or **Batch Upload**.
 
 ## Configuration (`.env`)
 
@@ -92,19 +83,8 @@ set in `.env`, then use **Single Label** or **Batch Upload**.
 | `MATCH_MODEL` | Small text model for semantic field matching (default `gemma3:4b`). |
 | `OLLAMA_TIMEOUT` | Per-request timeout in seconds (default `120`). |
 | `SECRET_KEY_BASE` | Rails secret. Generate with `bin/rails secret`. |
-| `AUTH_USERNAME` / `AUTH_PASSWORD` | Login credentials for the upload pages. |
-| `TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile keys. Leave blank to disable the challenge. |
 | `MAX_BATCH_SIZE` | Maximum rows per batch (default `300`). |
 | `SOLID_QUEUE_IN_PUMA` | `1` runs the job worker inside Puma (single container). |
-
-### Authentication & Turnstile
-
-The upload pages require a session login. Credentials come from `AUTH_USERNAME` /
-`AUTH_PASSWORD`. The login form is additionally guarded by a
-[Cloudflare Turnstile](https://developers.cloudflare.com/turnstile/) challenge,
-verified server-side. Get keys from the Cloudflare dashboard
-(Turnstile → Add site). If `TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` are left
-blank, the challenge is skipped — convenient for local development.
 
 ## Batch CSV format
 
@@ -179,6 +159,3 @@ model works for `MATCH_MODEL`. Remember to `ollama pull` the model first.
 bin/rails db:prepare
 bin/rails server          # http://localhost:3000
 ```
-
-With Turnstile keys unset, sign in using the default `AUTH_USERNAME` /
-`AUTH_PASSWORD` (`admin` / `password` if not overridden).
