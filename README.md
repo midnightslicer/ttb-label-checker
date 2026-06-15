@@ -36,12 +36,13 @@ Now, for the rest of the readme with the setup instructions :)
 # TTB Label Verification
 
 A Ruby on Rails application that checks alcohol label images against submitted
-application data. Each label image is sent to a **local Ollama vision model**,
-the printed fields are extracted, and every field is compared against the
-applicant-supplied values to produce a per-field pass/fail verdict
-(**Approve / Needs Review / Reject**).
+application data. Each label image is sent to a **local Ollama vision model**
+which transcribes the label and extracts the printed fields. Every field is
+compared against the applicant-supplied values; fields that deterministic string
+matching can't cleanly resolve are passed to a **second, smaller local text
+model** that judges them against the full transcription. The result is a
+per-field verdict (**Approve / Needs Review / Reject**).
 
-The UI follows the federal color palette used at ttb.gov and is mobile friendly.
 All upload pages are protected by username/password login plus a Cloudflare
 Turnstile challenge.
 
@@ -55,10 +56,13 @@ Turnstile challenge.
 ## Prerequisites
 
 - Docker + Docker Compose
-- [Ollama](https://ollama.com) running on the host, with a vision model pulled:
+- [Ollama](https://ollama.com) running on the host, with both models pulled:
   ```bash
-  ollama pull gemma3:12b
+  ollama pull qwen2.5vl:7b   # vision model (label transcription)
+  ollama pull gemma3:4b      # text model (semantic field matching)
   ```
+- ImageMagick — the label preprocessor shells out to it. Bundled in the Docker
+  image; install it on the host for local non-Docker development.
 
 ## Quick Start
 
@@ -79,7 +83,8 @@ set in `.env`, then use **Single Label** or **Batch Upload**.
 | Variable | Purpose |
 |---|---|
 | `OLLAMA_URL` | Ollama endpoint. Use `http://host.docker.internal:11434` in Docker. |
-| `OLLAMA_MODEL` | Vision model name (default `gemma3:12b`). Any Ollama vision model works. |
+| `VISION_MODEL` | Vision model name (code default `gemma3:12b`; `qwen2.5vl:7b` recommended and used in the hosted demo). Any Ollama vision model works. |
+| `MATCH_MODEL` | Small text model for semantic field matching (default `gemma3:4b`). |
 | `OLLAMA_TIMEOUT` | Per-request timeout in seconds (default `120`). |
 | `SECRET_KEY_BASE` | Rails secret. Generate with `bin/rails secret`. |
 | `AUTH_USERNAME` / `AUTH_PASSWORD` | Login credentials for the upload pages. |
@@ -110,10 +115,17 @@ extension). A template is downloadable from the Batch Upload page.
 
 ## How verdicts are decided
 
-- Each field is normalized (case, whitespace, punctuation) and compared:
-  exact → **match**, one contains the other → **fuzzy**, otherwise → **mismatch**.
+- Each field is first normalized (case, whitespace, punctuation) and compared
+  deterministically: exact → **match**, one contains the other → **fuzzy**,
+  otherwise → **mismatch**.
+- Fields the deterministic check can't cleanly resolve are sent to the
+  `MATCH_MODEL` text model, which judges them against the **full label
+  transcription** — catching synonyms, abbreviations, reordering, and labels that
+  list several parties (e.g. an importer and a bottler) where the structured
+  extraction captured the wrong one.
 - The Surgeon General **government warning** must match the required TTB language
-  verbatim (the `GOVERNMENT WARNING:` prefix must be present and uppercase).
+  verbatim (the `GOVERNMENT WARNING:` prefix must be present and uppercase). This
+  check stays pure code — it is never sent to the matcher.
 - **Reject** if any field mismatches or the warning isn't an exact match;
   **Needs Review** if only fuzzy matches remain; **Approve** if everything matches.
 
@@ -126,7 +138,9 @@ gateway IP (often `172.17.0.1`) or run the container with `--network=host`.
 
 ## Swapping models
 
-Change `OLLAMA_MODEL` in `.env` and restart. Any Ollama vision model works.
+Change `VISION_MODEL` (vision) or `MATCH_MODEL` (text matcher) in `.env` and
+restart. Any Ollama vision model works for `VISION_MODEL`; any small instruct
+model works for `MATCH_MODEL`. Remember to `ollama pull` the model first.
 
 ## Known limitations
 
