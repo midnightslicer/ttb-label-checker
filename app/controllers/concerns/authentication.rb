@@ -33,7 +33,7 @@ module Authentication
     expected_user = ENV.fetch("AUTH_USERNAME", "admin")
     expected_pass = ENV.fetch("AUTH_PASSWORD", "password")
 
-    ActiveSupport::SecurityUtils.secure_compare(username.to_s, expected_user) &
+    ActiveSupport::SecurityUtils.secure_compare(username.to_s.downcase, expected_user.downcase) &
       ActiveSupport::SecurityUtils.secure_compare(password.to_s, expected_pass)
   end
 end
