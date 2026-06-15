@@ -68,7 +68,7 @@ class OllamaService
   def request_extraction(image_data)
     response = connection.post("/api/generate") do |req|
       req.body = {
-        model:   ENV.fetch("OLLAMA_MODEL", "gemma3:12b"),
+        model:   ENV.fetch("VISION_MODEL", "gemma3:12b"),
         system:  SYSTEM_PROMPT,
         prompt:  USER_PROMPT,
         stream:  false,
