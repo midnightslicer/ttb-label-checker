@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  root "batches#index"
+  root "reviews#new"
 
   resources :reviews, only: %i[index new create show]
   resources :batches, only: %i[index new create show]
